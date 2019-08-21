@@ -41,12 +41,13 @@ int main ()
 				cout<<"Nombre del archivo: "; 
 				cin>>nombre;
 				InsertarImagen(nombre);
-				break;
-			case 2:
 				html="hola.html";
 				css ="hola.scss";
 				Escribirscss(css,ancho_imagen,alto_imagen,ancho_pixel,alto_pixel);
 				EscribirHtml(html,css);
+				break;
+			case 2:
+				cout<< "Opcion2\n";
 				break;
 			case 3:
 				cout<< "Opcion3\n";
@@ -137,40 +138,40 @@ void Escribirscss(string css,string ancho_imagen,string alto_imagen,string ancho
 		exit(1);
 	}
 
-	archivo<<"body {";
-    archivo<<"background: #333333;";      
-    archivo<<"height: 100vh;";
-    archivo<<"display: flex;";          
-    archivo<<"justify-content: center;";
-    archivo<<"align-items: center;";
-    archivo<<"}";
+	archivo<<"body {"<<endl;
+    archivo<<"  background: #333333;"<<endl;      
+    archivo<<"  height: 100vh;"<<endl;
+    archivo<<"  display: flex;"<<endl;          
+    archivo<<"  justify-content: center;"<<endl;
+    archivo<<"  align-items: center;"<<endl;
+    archivo<<"}"<<endl;
 
-    archivo<<".canvas {";
-    archivo<<"width: "<< <<"px;";
-    archivo<<"height: "<< <<"px;";
-	archivo<<"}";
+    archivo<<".canvas {"<<endl;
+    archivo<<"  width: "<<anchoactual<<"px;"<<endl;
+    archivo<<"  height: "<<altoactual<<"px;"<<endl;
+	archivo<<"}"<<endl;
 
-	archivo<<".pixel {";
-    archivo<<"width: "<<ancho_imagen<<"px;";
-    archivo<<"height: "<<alto_imagen<<"px;";
-    archivo<<"float: left;";
-    archivo<<"}";
+	archivo<<".pixel {"<<endl;
+    archivo<<"  width: "<<ancho_pixel<<"px;"<<endl;
+    archivo<<"  height: "<<alto_pixel<<"px;"<<endl;
+    archivo<<"  float: left;"<<endl;
+    archivo<<"}"<<endl;
 
-	archivo<<".pixel:nth-child(0),";
-	archivo<<".pixel:nth-child(9),";
-	archivo<<".pixel:nth-child(10),";
-	archivo<<".pixel:nth-child(14),";
-	archivo<<".pixel:nth-child(15),";
-	archivo<<".pixel:nth-child(16),";
-	archivo<<".pixel:nth-child(17),";
-	archivo<<".pixel:nth-child(20),";
-	archivo<<".pixel:nth-child(21),";
-	archivo<<".pixel:nth-child(22),";
-	archivo<<".pixel:nth-child(23),";
-	archivo<<".pixel:nth-child(27),";
-	archivo<<".pixel:nth-child(28){";
-    archivo<<"background: #000000;";
-	archivo<<"}";
+	archivo<<".pixel:nth-child(0),"<<endl;
+	archivo<<".pixel:nth-child(9),"<<endl;
+	archivo<<".pixel:nth-child(10),"<<endl;
+	archivo<<".pixel:nth-child(14),"<<endl;
+	archivo<<".pixel:nth-child(15),"<<endl;
+	archivo<<".pixel:nth-child(16),"<<endl;
+	archivo<<".pixel:nth-child(17),"<<endl;
+	archivo<<".pixel:nth-child(20),"<<endl;
+	archivo<<".pixel:nth-child(21),"<<endl;
+	archivo<<".pixel:nth-child(22),"<<endl;
+	archivo<<".pixel:nth-child(23),"<<endl;
+	archivo<<".pixel:nth-child(27),"<<endl;
+	archivo<<".pixel:nth-child(28){"<<endl;
+    archivo<<"  background: #000000;"<<endl;
+	archivo<<"}"<<endl;
 
 	archivo.close(); //Cerramos el archivo
 }
@@ -204,9 +205,168 @@ void EscribirHtml(string html, string css){
 
 	archivo.close(); //Cerramos el archivo
 }
-
-
-
+/* clase nodo */
+class node{
+public:
+	int data;
+	node* right;
+	node* left;
+	node* down;
+	node* up;
+	
+	node(int data){
+		this->data = data;
+		right = NULL;
+		left = NULL;
+		down = NULL;
+		up = NULL;
+	}
+};
+/*clase matriz*/
+class matrix{
+public:
+	node *head;
+	matrix(){
+		node *temp= new node(0);
+		head = temp;
+	}
+	void add(int value, int x, int y){
+		
+		add_x_header(x);
+		
+		add_y_header(y);
+		
+		node *new_node = new node(value);
+		add_x(new_node,x);
+		add_y(new_node,y);		
+	}
+	
+	void add_x(node *new_node, int x){
+		node *temp = head;
+		while(temp->data!=x){
+			temp = temp->right;
+		}
+		if(temp->down == NULL){
+			temp->down = new_node;
+			new_node->up = temp;
+		}
+	}
+	
+	void add_y(node *new_node, int y){
+		node *temp = head;
+		while(temp->data!=y){
+			temp = temp->down;
+		}
+		if(temp->right == NULL){
+			temp->right = new_node;
+			new_node->left = temp;
+		}
+	}
+	
+	void add_x_header(int x){
+		if(head->right==NULL){
+			node *temp = new node(x);
+			head->right = temp;
+			temp->left = head;
+		}else{
+			node *temp = head;
+			while(temp->right!=NULL && temp->right->data<x){
+				temp = temp->right;
+			}
+			if(temp->right==NULL){
+				node *new_temp = new node(x);
+				temp->right = new_temp;
+				new_temp->left = temp;
+			}else if(temp->right!=NULL && temp->right->data != x){
+				node *new_temp = new node(x);
+				node *der = temp->right;
+				temp->right = new_temp;
+				new_temp->left = temp;
+				new_temp->right = der;
+				der->left = new_temp;
+			}
+		}
+	}
+	void add_y_header(int y){
+		if(head->down==NULL){
+			node *temp = new node(y);
+			head->down = temp;
+			temp->up = head;
+		}else{
+			node *temp = head;
+			while(temp->down!=NULL && temp->down->data<y){
+				temp = temp->down;
+			}
+			if(temp->down==NULL){
+				node *new_temp = new node(y);
+				temp->down = new_temp;
+				new_temp->up = temp;
+			}else if(temp->down!=NULL && temp->down->data != y){
+				node *new_temp = new node(y);
+				node *der = temp->down;
+				temp->down = new_temp;
+				new_temp->up = temp;
+				new_temp->down = der;
+				der->up = new_temp;
+			}
+		}
+	}
+	void print_headers(){
+		print_x_header();
+		print_y_header();
+	}
+	
+	void print_y_header(){
+		node *temp = head->down;
+		while(temp->down!=NULL){
+			cout<<temp->data;
+			cout<<"\n";
+			temp = temp->down;
+	}
+		cout<<temp->data;
+		cout<<"\n";	
+	}
+	void print_x_header(){
+		node *temp = head;
+		while(temp->right!=NULL){
+			cout<<temp->data;
+			cout<<"->";
+			temp = temp->right;
+	}
+		cout<<temp->data;
+		cout<<"\n";	
+	}
+	void print_nodes_x(){
+		node *temp = head->right;
+		while(temp->right!=NULL){
+			cout<<temp->data;
+			cout<<"->";
+			if(temp->down!=NULL){
+				cout<<temp->down->data;
+			}
+			cout<<"\n";
+			temp = temp->right;
+	}
+		cout<<temp->data;
+		cout<<"->";
+		cout<<temp->down->data;	
+	}
+	void print_nodes_y(){
+		node *temp = head->down;
+		while(temp->down!=NULL){
+			cout<<temp->data;
+			cout<<"->";
+			if(temp->right!=NULL){
+				cout<<temp->right->data;		
+			}
+			cout<<"\n";
+			temp = temp->down;
+	}
+		cout<<temp->data;
+		cout<<"->";
+		cout<<temp->right->data;	
+	}
+};
 
 
 
