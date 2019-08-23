@@ -4,6 +4,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <cstring>
 using namespace std;
 
 
@@ -261,7 +262,6 @@ void InsertarImagen(string nombre){
 	}
 	}
 	for (unsigned i = 0; i < datos_csv.size(); i++){
-		//cout << datos_csv.at(i)<< "\n";
 		if (datos_csv.at(i) == "0"){
 			config = datos_csv.at(i+1);
 		}else if (datos_csv.at(i) == "1"){
@@ -273,7 +273,7 @@ void InsertarImagen(string nombre){
 	AbrirCapa(capa, ancho_imagen);
 	cout<<"\nImagen insertada\n";
 }
-
+/*abrir config */
 void AbrirConfig(string config){
 	ifstream infile(config.c_str());
 	string line = "";
@@ -298,7 +298,7 @@ void AbrirConfig(string config){
 		}
 	}
 }
-
+/*abrir capas */
 void AbrirCapa(string capa,string ancho_imagen){
 	int ancho = atoi(ancho_imagen.c_str());
 	
@@ -326,16 +326,15 @@ void AbrirCapa(string capa,string ancho_imagen){
 
 void Escribirscss(string css,string ancho_imagen,string alto_imagen,string ancho_pixel,string alto_pixel){
 	
+	
+	
 	int altoactual = atoi(alto_imagen.c_str())*atoi(alto_pixel.c_str());
 	int anchoactual = atoi(ancho_imagen.c_str())*atoi(ancho_pixel.c_str());
 	
 	vector<int>pintar;
+	vector<string>value;
 	
-	for (int i=0; i<cubo_lineal.size(); i++){
-	if(cubo_lineal.at(i)!="x"){
-		pintar.push_back(i+1);
-	}
-	}
+	
 	for(int i=0; i<pintar.size();i++){
 		cout<<pintar.at(i)<<"->";
 	}
@@ -370,16 +369,35 @@ void Escribirscss(string css,string ancho_imagen,string alto_imagen,string ancho
     archivo<<"  float: left;"<<endl;
     archivo<<"}"<<endl;
 
+	for (int i=0; i<cubo_lineal.size(); i++){
+	if(cubo_lineal.at(i)!="x"){
+		pintar.push_back(i+1);
+		//metodo de split
+		string hola = cubo_lineal.at(i);
+		char str[hola.size()+1];
+		strcpy(str,hola.c_str());
+		char* point;
+		point = strtok(str,"-");
+	    
+	    int r = atoi(point);
+		point = strtok(NULL,"-");
+		int g = atoi(point);
+		point = strtok(NULL,"-");
+		int b = atoi(point);
+		point = strtok(NULL,"-");
+		//pasar valores
+		RGB data = RGB(r, g, b);
+		value.push_back(RGBToHexadecimal(data));
+	}
+	}
+
 	for(int i=0; i<pintar.size();i++){
-		if (i==pintar.size()-1){
-			archivo<<".pixel:nth-child("<<pintar.at(i)<<")"<<endl;
-		}else{
-		archivo<<".pixel:nth-child("<<pintar.at(i)<<"),"<<endl;
-		}
+		archivo<<".pixel:nth-child("<<pintar.at(i)<<")"<<endl;
+		archivo<<"  {background: "<<value.at(i)<<";"<<endl;
+	archivo<<"}"<<endl;
 	}
 	
-    archivo<<"  {background: #000000;"<<endl;
-	archivo<<"}"<<endl;
+    
 
 	archivo.close(); //Cerramos el archivo
 }
@@ -419,8 +437,7 @@ void EscribirHtml(string html, string css,string ancho_imagen,string alto_imagen
 /*Main*/
 int main ()
 {
-	RGB data = RGB(88, 214, 141);
-	string value = RGBToHexadecimal(data);
+	
 	int a;
 	do{
 		cout<< "\n";
@@ -448,7 +465,6 @@ int main ()
 				break;
 			case 2:
 				cout<< "Opcion2\n";
-				cout<<value;
 				break;
 			case 3:
 				cout<< "Opcion3\n";
