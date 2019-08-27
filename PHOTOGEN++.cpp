@@ -25,6 +25,7 @@ void AbrirCapa(string capa,string ancho_imagen);
 void EscribirHtml(string html,string css,string ancho_imagen,string alto_imagen);
 void Escribirscss(string css,string ancho_imagen,string alto_imagen,string ancho_pixel,string alto_pixel);
 
+
 /* clase nodo */
 class node{
 public:
@@ -196,7 +197,47 @@ public:
 		cout<<temp->right->data;	
 	}
 };
-matrix *cubo = new matrix;
+/*Cubo disperso*/
+/*clase nodo cubo disperso*/
+struct nodo{
+	matrix dato;
+	nodo* siguiente;
+} *primero, *ultimo;
+
+void InsertarMatriz(matrix n);
+void DesplegarCubo();
+/*Metodos del cubo*/
+void InsertarMatriz(matrix n){
+	nodo* nuevo = new nodo();
+	nuevo->dato = n;
+	
+	if(primero == NULL){
+		primero = nuevo;
+		primero->siguiente = NULL;
+		ultimo = nuevo;
+	}else{
+		ultimo->siguiente = nuevo;
+		nuevo->siguiente = NULL;
+		ultimo = nuevo;
+	}
+}
+
+void DesplegarCubo(){
+	nodo* actual = new nodo();
+	actual = primero;
+	if(primero != NULL){
+		
+		while(actual != NULL){
+			actual->dato.print_headers();  
+			cout<< endl;
+			actual = actual->siguiente;
+		}
+		
+	}else{
+		cout  << "\nEl cubo disperso se encuentra vacio\n\n";
+	}
+}
+
 /*RGB to Hexa*/
 class RGB
 {
@@ -261,16 +302,20 @@ void InsertarImagen(string nombre){
 		datos_csv.push_back(word);
 	}
 	}
-	for (unsigned i = 0; i < datos_csv.size(); i++){
-		if (datos_csv.at(i) == "0"){
-			config = datos_csv.at(i+1);
-		}else if (datos_csv.at(i) == "1"){
-			capa = datos_csv.at(i+1);
+	for (unsigned i = 1; i < datos_csv.size(); i+=2){
+		cout<<datos_csv.at(i)<<endl;
+		if (i==3){
+			config = datos_csv.at(i);
+			AbrirConfig(config);
+		}else{
+			capa = datos_csv.at(i);
+			AbrirCapa(capa, ancho_imagen);
 		}
-	    
 	}
-	AbrirConfig(config);
-	AbrirCapa(capa, ancho_imagen);
+	html="hola.html";
+	css ="hola.scss";
+	Escribirscss(css,ancho_imagen,alto_imagen,ancho_pixel,alto_pixel);
+	EscribirHtml(html,css,ancho_imagen,alto_imagen);
 	cout<<"\nImagen insertada\n";
 }
 /*abrir config */
@@ -300,6 +345,9 @@ void AbrirConfig(string config){
 }
 /*abrir capas */
 void AbrirCapa(string capa,string ancho_imagen){
+	/*Cubo*/
+	matrix *cubo = new matrix;
+	
 	int ancho = atoi(ancho_imagen.c_str());
 	
 	ifstream infile(capa.c_str());
@@ -322,14 +370,17 @@ void AbrirCapa(string capa,string ancho_imagen){
 			x=1;
 		}
 	}
+	InsertarMatriz(*cubo);
 }
-
+/*Escribir css*/
 void Escribirscss(string css,string ancho_imagen,string alto_imagen,string ancho_pixel,string alto_pixel){
 	
 	
 	
 	int altoactual = atoi(alto_imagen.c_str())*atoi(alto_pixel.c_str());
 	int anchoactual = atoi(ancho_imagen.c_str())*atoi(ancho_pixel.c_str());
+	
+	int AltoPorAncho = atoi(ancho_imagen.c_str())*atoi(alto_imagen.c_str());
 	
 	vector<int>pintar;
 	vector<string>value;
@@ -368,10 +419,14 @@ void Escribirscss(string css,string ancho_imagen,string alto_imagen,string ancho
     archivo<<"  height: "<<alto_pixel<<"px;"<<endl;
     archivo<<"  float: left;"<<endl;
     archivo<<"}"<<endl;
-
+	int K=0;
 	for (int i=0; i<cubo_lineal.size(); i++){
+	
+		if(K==AltoPorAncho){
+			K=0;
+		}
 	if(cubo_lineal.at(i)!="x"){
-		pintar.push_back(i+1);
+		pintar.push_back(K+1);
 		//metodo de split
 		string hola = cubo_lineal.at(i);
 		char str[hola.size()+1];
@@ -389,6 +444,7 @@ void Escribirscss(string css,string ancho_imagen,string alto_imagen,string ancho
 		RGB data = RGB(r, g, b);
 		value.push_back(RGBToHexadecimal(data));
 	}
+	K+=1;
 	}
 
 	for(int i=0; i<pintar.size();i++){
@@ -397,11 +453,9 @@ void Escribirscss(string css,string ancho_imagen,string alto_imagen,string ancho
 	archivo<<"}"<<endl;
 	}
 	
-    
-
 	archivo.close(); //Cerramos el archivo
 }
-
+/*Escrbir html*/
 void EscribirHtml(string html, string css,string ancho_imagen,string alto_imagen){
 	ofstream archivo;
 	string nombreArchivo,frase;
@@ -458,12 +512,9 @@ int main ()
 				cout<<"Nombre del archivo: "; 
 				cin>>nombre;
 				InsertarImagen(nombre);
-				html="hola.html";
-				css ="hola.scss";
-				Escribirscss(css,ancho_imagen,alto_imagen,ancho_pixel,alto_pixel);
-				EscribirHtml(html,css,ancho_imagen,alto_imagen);
 				break;
 			case 2:
+				//DesplegarCubo();
 				cout<< "Opcion2\n";
 				break;
 			case 3:
