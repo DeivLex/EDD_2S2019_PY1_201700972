@@ -5,7 +5,9 @@
 #include <string>
 #include <vector>
 #include <cstring>
+#include <direct.h>
 using namespace std;
+
 
 
 vector<string>cubo_lineal;
@@ -369,7 +371,8 @@ void tree :: postorder( Node *root) {
     }
     
 }
-
+/*Creacion del arbol*/
+tree Arbol;
 /*Abrir primer csv*/
 void InsertarImagen(string nombre){
 	string config;
@@ -385,7 +388,7 @@ void InsertarImagen(string nombre){
 	}
 	}
 	for (unsigned i = 1; i < datos_csv.size(); i+=2){
-		cout<<datos_csv.at(i)<<endl;
+		//cout<<datos_csv.at(i)<<endl;
 		if (i==3){
 			config = datos_csv.at(i);
 			AbrirConfig(config);
@@ -394,8 +397,10 @@ void InsertarImagen(string nombre){
 			AbrirCapa(capa, ancho_imagen);
 		}
 	}
-	html="hola.html";
-	css ="hola.scss";
+	string token = nombre.substr(0, nombre.find(".csv"));
+	Arbol.insert(token+", Dimensiones Imagen: "+ancho_imagen+"X"+alto_imagen+", Dimensiones Pixel: "+ancho_pixel+"X"+alto_pixel);
+	html=token+".html";
+	css =token+".scss";
 	Escribirscss(css,ancho_imagen,alto_imagen,ancho_pixel,alto_pixel);
 	EscribirHtml(html,css,ancho_imagen,alto_imagen);
 	cout<<"\nImagen insertada\n";
@@ -444,7 +449,6 @@ void AbrirCapa(string capa,string ancho_imagen){
 	int x=1;
 	int y=1;
 	for (unsigned i = 0; i < cubo_lineal.size(); i++){
-		//cout << cubo_lineal.at(i)<< "\n";
 		cubo->add(cubo_lineal.at(i),x,y);
 		x+=1;
 		if(x==ancho+1){
@@ -476,7 +480,12 @@ void Escribirscss(string css,string ancho_imagen,string alto_imagen,string ancho
 	string nombreArchivo,frase;
 	char rpt;
 	
-	archivo.open(css.c_str(),ios::out); //Creamos el archivo
+	string token = nombre.substr(0, nombre.find(".csv"));
+	string direccion = "Exports/"+token;
+	mkdir(direccion.c_str());
+	string nombrecss = direccion+"/"+css;
+	
+	archivo.open(nombrecss.c_str(),ios::out); //Creamos el archivo
 	
 	if(archivo.fail()){ //Si a ocurrido algun error
 		cout<<"No se pudo abrir el archivo";
@@ -545,7 +554,11 @@ void EscribirHtml(string html, string css,string ancho_imagen,string alto_imagen
 	
 	int divs = atoi(alto_imagen.c_str())*atoi(ancho_imagen.c_str());
 	
-	archivo.open(html.c_str(),ios::out); //Creamos el archivo
+	string token = nombre.substr(0, nombre.find(".csv"));
+	string direccion = "Exports/"+token;
+	mkdir(direccion.c_str());
+	string nombrehtml = direccion+"/"+html;
+	archivo.open(nombrehtml.c_str(),ios::out); //Creamos el archivo
 	
 	if(archivo.fail()){ //Si a ocurrido algun error
 		cout<<"No se pudo abrir el archivo";
@@ -573,7 +586,10 @@ void EscribirHtml(string html, string css,string ancho_imagen,string alto_imagen
 /*Main*/
 int main ()
 {
-	
+	string parametrox;
+	string parametroy;
+	string parametroz;
+	string parametrocolor;
 	int a;
 	do{
 		cout<< "\n";
@@ -596,14 +612,21 @@ int main ()
 				InsertarImagen(nombre);
 				break;
 			case 2:
-				//DesplegarCubo();
-				cout<< "Opcion2\n";
+				Arbol.inorder();
 				break;
 			case 3:
 				cout<< "Opcion3\n";
 				break;
 			case 4:
-				cout<< "Opcion4\n";
+				cout<<"Coordenada x: "; 
+				cin>>parametrox;
+				cout<<"Coordenada y: "; 
+				cin>>parametroy;
+				cout<<"Numero de capa: "; 
+				cin>>parametroz;
+				cout<<"Color R-G-B: "; 
+				cin>>parametrocolor;
+				cout<<parametrox+","+parametroy+","+parametroz+","+parametrocolor;
 				break;
 			case 5:
 				cout<< "Opcion5\n";
