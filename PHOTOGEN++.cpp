@@ -178,35 +178,20 @@ public:
 		cout<<temp->data;
 		cout<<"\n";	
 	}
-	void print_nodes_x(){
-		node *temp = head->right;
+	void print_nodes_full(){
+		node *temp = head;
+		node *temp2 = head;
+	while(temp->down!=NULL){
+		temp= temp2;
+		temp2 = temp2->down;
+		cout<<temp->data;
 		while(temp->right!=NULL){
-			cout<<temp->data;
-			cout<<"->";
-			if(temp->down!=NULL){
-				cout<<temp->down->data;
-			}
-			cout<<"\n";
 			temp = temp->right;
-	}
-		cout<<temp->data;
-		cout<<"->";
-		cout<<temp->down->data;	
-	}
-	void print_nodes_y(){
-		node *temp = head->down;
-		while(temp->down!=NULL){
-			cout<<temp->data;
 			cout<<"->";
-			if(temp->right!=NULL){
-				cout<<temp->right->data;		
-			}
-			cout<<"\n";
-			temp = temp->down;
+			cout<<temp->data;
+		}
+		cout<<"\n";
 	}
-		cout<<temp->data;
-		cout<<"->";
-		cout<<temp->right->data;	
 	}
 };
 /*Cubo disperso*/
