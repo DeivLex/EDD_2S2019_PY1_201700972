@@ -71,9 +71,14 @@ public:
 		while(temp->data!=ss.str()){
 			temp = temp->right;
 		}
+		for(int i=0;i<1000;i++){
 		if(temp->down == NULL){
 			temp->down = new_node;
 			new_node->up = temp;
+			i=1000;
+			}else{
+			temp = temp->down;	
+			}
 		}
 	}
 	
@@ -84,9 +89,14 @@ public:
 		while(temp->data!=ss.str()){
 			temp = temp->down;
 		}
+		for(int i=0;i<1000;i++){
 		if(temp->right == NULL){
 			temp->right = new_node;
 			new_node->left = temp;
+			i=1000;
+			}else{
+			temp = temp->right;	
+			}
 		}
 	}
 	
