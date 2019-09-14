@@ -27,7 +27,7 @@ void AbrirConfig(string config,string carpeta);
 void AbrirCapa(string capa,string ancho_imagen,string carpeta);
 void EscribirHtml(string html,string css,string ancho_imagen,string alto_imagen);
 void Escribirscss(string css,string ancho_imagen,string alto_imagen,string ancho_pixel,string alto_pixel);
-
+void ReporteArbol();
 
 /* clase nodo */
 class node{
@@ -582,6 +582,31 @@ void EscribirHtml(string html, string css,string ancho_imagen,string alto_imagen
 
 	archivo.close(); //Cerramos el archivo
 }
+/*Reporte Arbol binario*/
+void ReporteArbol(){
+	ofstream archivo;
+	char rpt;
+
+	archivo.open("arbol.dot",ios::out); //Creamos el archivo
+	
+	if(archivo.fail()){ //Si a ocurrido algun error
+		cout<<"No se pudo abrir el archivo";
+		exit(1);
+	}
+	
+	archivo<<"digraph G {"<<endl;
+	archivo<<"padre -> hijo;"<<endl;
+    archivo<<"padre -> hija;"<<endl;
+    archivo<<"hijo -> nieto1;"<<endl;
+    archivo<<"hijo -> nieta1;"<<endl;
+    archivo<<"hija -> nieto;"<<endl;
+    archivo<<"hija -> nieta;"<<endl;
+    archivo<<"}"<<endl;
+	archivo.close(); //Cerramos el archivo
+	
+	system("dot -Tpng arbol.dot -o arbol.png");
+	system("arbol.png" );
+}
 
 /*Main*/
 int main ()
@@ -636,7 +661,7 @@ int main ()
 				break;
 			case 6:
 				cout<< "Opcion6\n";
-				DesplegarCubo();
+				ReporteArbol();
 				break;				
 			case 7:
 				system("pause");
