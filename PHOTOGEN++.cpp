@@ -12,6 +12,7 @@ using namespace std;
 
 vector<string>cubo_lineal;
 
+string carpeta;
 string nombre;
 string html;
 string css;
@@ -21,9 +22,9 @@ string alto_imagen;
 string ancho_pixel;
 string alto_pixel;
 
-void InsertarImagen(string nombre);
-void AbrirConfig(string config);
-void AbrirCapa(string capa,string ancho_imagen);
+void InsertarImagen(string nombre,string carpeta);
+void AbrirConfig(string config,string carpeta);
+void AbrirCapa(string capa,string ancho_imagen,string carpeta);
 void EscribirHtml(string html,string css,string ancho_imagen,string alto_imagen);
 void Escribirscss(string css,string ancho_imagen,string alto_imagen,string ancho_pixel,string alto_pixel);
 
@@ -225,7 +226,7 @@ void DesplegarCubo(){
 	if(primero != NULL){
 		
 		while(actual != NULL){
-			actual->dato.print_headers();  
+			actual->dato.print_nodes_full();  
 			cout<< endl;
 			actual = actual->siguiente;
 		}
@@ -368,11 +369,13 @@ void tree :: postorder( Node *root) {
 }
 /*Creacion del arbol*/
 tree Arbol;
+tree ArbolTemp;
 /*Abrir primer csv*/
-void InsertarImagen(string nombre){
+void InsertarImagen(string nombre,string carpeta){
 	string config;
 	string capa;
-	ifstream infile(nombre.c_str());
+	string direccion = carpeta+"/"+nombre;
+	ifstream infile(direccion.c_str());
 	string line = "";
 	vector<string>datos_csv;
 	while (getline(infile, line)){
@@ -383,17 +386,17 @@ void InsertarImagen(string nombre){
 	}
 	}
 	for (unsigned i = 1; i < datos_csv.size(); i+=2){
-		//cout<<datos_csv.at(i)<<endl;
 		if (i==3){
 			config = datos_csv.at(i);
-			AbrirConfig(config);
+			AbrirConfig(config,carpeta);
 		}else{
 			capa = datos_csv.at(i);
-			AbrirCapa(capa, ancho_imagen);
+			AbrirCapa(capa, ancho_imagen,carpeta);
 		}
 	}
 	string token = nombre.substr(0, nombre.find(".csv"));
-	Arbol.insert(token+", Dimensiones Imagen: "+ancho_imagen+"X"+alto_imagen+", Dimensiones Pixel: "+ancho_pixel+"X"+alto_pixel);
+	Arbol.insert(token+", Imagen: "+ancho_imagen+"X"+alto_imagen+", Pixel: "+ancho_pixel+"X"+alto_pixel);
+	ArbolTemp.insert(direccion);
 	html=token+".html";
 	css =token+".scss";
 	Escribirscss(css,ancho_imagen,alto_imagen,ancho_pixel,alto_pixel);
@@ -401,8 +404,9 @@ void InsertarImagen(string nombre){
 	cout<<"\nImagen insertada\n";
 }
 /*abrir config */
-void AbrirConfig(string config){
-	ifstream infile(config.c_str());
+void AbrirConfig(string config,string carpeta){
+	string direccion = carpeta+"/"+config;
+	ifstream infile(direccion.c_str());
 	string line = "";
 	vector<string> datos_config;
 	while (getline(infile, line)){
@@ -426,13 +430,14 @@ void AbrirConfig(string config){
 	}
 }
 /*abrir capas */
-void AbrirCapa(string capa,string ancho_imagen){
+void AbrirCapa(string capa,string ancho_imagen,string carpeta){
 	/*Cubo*/
 	matrix *cubo = new matrix;
 	
 	int ancho = atoi(ancho_imagen.c_str());
 	
-	ifstream infile(capa.c_str());
+	string direccion = carpeta+"/"+capa;
+	ifstream infile(direccion.c_str());
 	string line = "";
 	while (getline(infile, line)){
 		stringstream strstr(line);
@@ -602,12 +607,15 @@ int main ()
 		switch (a)
 		{
 			case 1:
+				cout<<"Carpeta del archivo: "; 
+				cin>>carpeta;
 				cout<<"Nombre del archivo: "; 
 				cin>>nombre;
-				InsertarImagen(nombre);
+				InsertarImagen(nombre,carpeta);
 				break;
 			case 2:
 				Arbol.inorder();
+				ArbolTemp.inorder();
 				break;
 			case 3:
 				cout<< "Opcion3\n";
@@ -628,6 +636,7 @@ int main ()
 				break;
 			case 6:
 				cout<< "Opcion6\n";
+				DesplegarCubo();
 				break;				
 			case 7:
 				system("pause");
