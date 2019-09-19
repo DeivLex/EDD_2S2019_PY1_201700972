@@ -12,6 +12,8 @@ using namespace std;
 
 vector<string>cubo_lineal;
 
+string GraficarArbol="";
+
 string carpeta;
 string nombre;
 string html;
@@ -72,11 +74,11 @@ public:
 		while(temp->data!=ss.str()){
 			temp = temp->right;
 		}
-		for(int i=0;i<1000;i++){
+		for(int i=0;i<10000;i++){
 		if(temp->down == NULL){
 			temp->down = new_node;
 			new_node->up = temp;
-			i=1000;
+			i=10000;
 			}else{
 			temp = temp->down;	
 			}
@@ -90,11 +92,11 @@ public:
 		while(temp->data!=ss.str()){
 			temp = temp->down;
 		}
-		for(int i=0;i<1000;i++){
+		for(int i=0;i<10000;i++){
 		if(temp->right == NULL){
 			temp->right = new_node;
 			new_node->left = temp;
-			i=1000;
+			i=10000;
 			}else{
 			temp = temp->right;	
 			}
@@ -307,9 +309,11 @@ public:
     void inorder()  { inorder(root);};
     void postorder()  { postorder(root);};
     void preorder()  { preorder(root);};
+    void Padre()  { Padre(root);};
     void inorder( Node* actual) ;
     void postorder( Node*actual);
     void preorder( Node* actual) ;
+    void Padre( Node* actual) ;
     
     
 };
@@ -365,7 +369,14 @@ void tree :: postorder( Node *root) {
         cout << " " << root->data << " ->";
         
     }
-    
+}
+void tree :: Padre( Node *root) {
+    if (root != NULL) {
+    	GraficarArbol = GraficarArbol +" -> "+ root->data;
+        Padre(root -> n_izq);
+        GraficarArbol= GraficarArbol +"\n"+ root->data;
+        Padre(root -> n_der);
+    }
 }
 /*Creacion del arbol*/
 tree Arbol;
@@ -381,7 +392,7 @@ void InsertarImagen(string nombre,string carpeta){
 	while (getline(infile, line)){
 		stringstream strstr(line);
 		string word = "";
-	while (getline(strstr,word, ';')){
+	while (getline(strstr,word, ',')){
 		datos_csv.push_back(word);
 	}
 	}
@@ -395,7 +406,7 @@ void InsertarImagen(string nombre,string carpeta){
 		}
 	}
 	string token = nombre.substr(0, nombre.find(".csv"));
-	Arbol.insert(token+", Imagen: "+ancho_imagen+"X"+alto_imagen+", Pixel: "+ancho_pixel+"X"+alto_pixel);
+	Arbol.insert(token+"_Imagen_"+ancho_imagen+"X"+alto_imagen+"_Pixel_"+ancho_pixel+"X"+alto_pixel);
 	ArbolTemp.insert(direccion);
 	html=token+".html";
 	css =token+".scss";
@@ -412,7 +423,7 @@ void AbrirConfig(string config,string carpeta){
 	while (getline(infile, line)){
 		stringstream strstr(line);
 		string word = "";
-	while (getline(strstr,word, ';')){
+	while (getline(strstr,word, ',')){
 		datos_config.push_back(word);
 	}
 	}
@@ -442,7 +453,7 @@ void AbrirCapa(string capa,string ancho_imagen,string carpeta){
 	while (getline(infile, line)){
 		stringstream strstr(line);
 		string word = "";
-	while (getline(strstr,word, ';')){
+	while (getline(strstr,word, ',')){
 		cubo_lineal.push_back(word);
 	}
 	}
@@ -545,6 +556,9 @@ void Escribirscss(string css,string ancho_imagen,string alto_imagen,string ancho
 	}
 	
 	archivo.close(); //Cerramos el archivo
+	cubo_lineal.clear();
+	pintar.clear();
+	value.clear();
 }
 /*Escrbir html*/
 void EscribirHtml(string html, string css,string ancho_imagen,string alto_imagen){
@@ -595,13 +609,11 @@ void ReporteArbol(){
 	}
 	
 	archivo<<"digraph G {"<<endl;
-	archivo<<"padre -> hijo;"<<endl;
-    archivo<<"padre -> hija;"<<endl;
-    archivo<<"hijo -> nieto1;"<<endl;
-    archivo<<"hijo -> nieta1;"<<endl;
-    archivo<<"hija -> nieto;"<<endl;
-    archivo<<"hija -> nieta;"<<endl;
-    archivo<<"}"<<endl;
+	archivo<<"nodesep=2.0;"<<endl;
+    archivo<<"ranksep=0.3;"<<endl;
+    archivo<<"graph [ordering="<<(char)34<<"out"<<(char)34<<"];";
+	archivo<<"Lista_De_Imagenes "<<GraficarArbol<<";"<<endl;
+	archivo<<"}"<<endl;
 	archivo.close(); //Cerramos el archivo
 	
 	system("dot -Tpng arbol.dot -o arbol.png");
@@ -661,6 +673,7 @@ int main ()
 				break;
 			case 6:
 				cout<< "Opcion6\n";
+				Arbol.Padre();
 				ReporteArbol();
 				break;				
 			case 7:

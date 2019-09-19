@@ -1,5 +1,5 @@
-Config;Value
-image_width;6
-image_height;6
-pixel_width;30
-pixel_height;30
+Config,Value
+image_width,6
+image_height,6
+pixel_width,30
+pixel_height,30
