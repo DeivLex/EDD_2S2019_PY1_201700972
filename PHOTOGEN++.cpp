@@ -12,7 +12,12 @@ using namespace std;
 
 vector<string>cubo_lineal;
 
+
+string ReporteMatrix="";
 string GraficarArbol="";
+string Inorden="";
+string Preorden="";
+string Postorden="";
 
 string carpeta;
 string nombre;
@@ -30,6 +35,10 @@ void AbrirCapa(string capa,string ancho_imagen,string carpeta);
 void EscribirHtml(string html,string css,string ancho_imagen,string alto_imagen);
 void Escribirscss(string css,string ancho_imagen,string alto_imagen,string ancho_pixel,string alto_pixel);
 void ReporteArbol();
+void ReporteArbolInorden();
+void ReporteArbolPreorden();
+void ReporteArbolPostorden();
+void ReporteMatriz();
 
 /* clase nodo */
 class node{
@@ -49,8 +58,8 @@ public:
 	}
 };
 /*Clase matriz*/
-class matrix{
-public:
+	class matrix{
+	public:
 	node *head;
 	matrix(){
 		node *temp= new node("0");
@@ -181,19 +190,25 @@ public:
 		cout<<temp->data;
 		cout<<"\n";	
 	}
+	
 	void print_nodes_full(){
 		node *temp = head;
 		node *temp2 = head;
 	while(temp->down!=NULL){
 		temp= temp2;
 		temp2 = temp2->down;
+		ReporteMatrix = ReporteMatrix + "C"+temp->data;
 		cout<<temp->data;
 		while(temp->right!=NULL){
 			temp = temp->right;
+			if(temp->data!="x"){
+			ReporteMatrix = ReporteMatrix +" -> "+temp->data;
+			}
 			cout<<"->";
 			cout<<temp->data;
 		}
-		cout<<"\n";
+		ReporteMatrix = ReporteMatrix+"[dir=both];" + "\n";
+		//cout<<"\n";
 	}
 	}
 };
@@ -205,7 +220,7 @@ struct nodo{
 } *primero, *ultimo;
 
 void InsertarMatriz(matrix n);
-void DesplegarCubo();
+void DesplegarCubo(int x);
 /*Metodos del cubo*/
 void InsertarMatriz(matrix n){
 	nodo* nuevo = new nodo();
@@ -222,15 +237,17 @@ void InsertarMatriz(matrix n){
 	}
 }
 
-void DesplegarCubo(){
+void DesplegarCubo(int x){
 	nodo* actual = new nodo();
 	actual = primero;
+	int j = 0;
 	if(primero != NULL){
 		
-		while(actual != NULL){
+		while(x != j ){
 			actual->dato.print_nodes_full();  
 			cout<< endl;
 			actual = actual->siguiente;
+			j++;
 		}
 		
 	}else{
@@ -310,11 +327,12 @@ public:
     void postorder()  { postorder(root);};
     void preorder()  { preorder(root);};
     void Padre()  { Padre(root);};
+    void Iinorder()  { Iinorder(root);};
     void inorder( Node* actual) ;
     void postorder( Node*actual);
     void preorder( Node* actual) ;
     void Padre( Node* actual) ;
-    
+    void Iinorder( Node* actual) ;
     
 };
 
@@ -344,10 +362,20 @@ bool tree :: insert(string item, Node *raiz_actual) {
     }
 }
 
+void tree :: Iinorder( Node *root) {
+    if (root != NULL) {
+        Iinorder(root -> n_izq);
+        cout <<" - "<< root->data <<endl;
+        Iinorder(root -> n_der);
+    }
+    
+}
+
 void tree :: inorder( Node *root) {
     if (root != NULL) {
         inorder(root -> n_izq);
-        cout <<" - "<< root->data <<endl;
+        Inorden = Inorden +" -> "+ root->data;
+        //cout <<" - "<< root->data <<endl;
         inorder(root -> n_der);
     }
     
@@ -355,21 +383,25 @@ void tree :: inorder( Node *root) {
 
 void tree :: preorder( Node *root) {
     if (root != NULL) {
-        cout << " " << root->data << " ->";
+    	Preorden = Preorden +" -> "+ root->data;
+        //cout << " " << root->data << " ->";
         preorder(root -> n_izq);
         preorder(root -> n_der);
     }
     
 }
 
+
 void tree :: postorder( Node *root) {
     if (root != NULL) {
         postorder(root -> n_izq);
         postorder(root -> n_der);
-        cout << " " << root->data << " ->";
+        Postorden = Postorden +" -> "+ root->data;
+        //cout << " " << root->data << " ->";
         
-    }
+    }    
 }
+
 void tree :: Padre( Node *root) {
     if (root != NULL) {
     	GraficarArbol = GraficarArbol +" -> "+ root->data;
@@ -440,10 +472,12 @@ void AbrirConfig(string config,string carpeta){
 		}
 	}
 }
+
+/*Cubo*/
+	matrix *cubo = new matrix;
+
 /*abrir capas */
 void AbrirCapa(string capa,string ancho_imagen,string carpeta){
-	/*Cubo*/
-	matrix *cubo = new matrix;
 	
 	int ancho = atoi(ancho_imagen.c_str());
 	
@@ -544,6 +578,8 @@ void Escribirscss(string css,string ancho_imagen,string alto_imagen,string ancho
 		point = strtok(NULL,"-");
 		//pasar valores
 		RGB data = RGB(r, g, b);
+		int y=(0.2126*r)+(0.7152*g)+(0.0722*b);
+		//RGB data = RGB(y, y, y);
 		value.push_back(RGBToHexadecimal(data));
 	}
 	K+=1;
@@ -619,7 +655,93 @@ void ReporteArbol(){
 	system("dot -Tpng arbol.dot -o arbol.png");
 	system("arbol.png" );
 }
+/*Reporte Arbol Inorden*/
+void ReporteArbolInorden(){
+	ofstream archivo;
+	char rpt;
 
+	archivo.open("arbol1.dot",ios::out); //Creamos el archivo
+	
+	if(archivo.fail()){ //Si a ocurrido algun error
+		cout<<"No se pudo abrir el archivo";
+		exit(1);
+	}
+	
+	archivo<<"digraph G {"<<endl;
+    archivo<<"rankdir=LR;"<<endl;
+	archivo<<"Inorden "<<Inorden<<";"<<endl;
+	archivo<<"}"<<endl;
+	archivo.close(); //Cerramos el archivo
+	
+	system("dot -Tpng arbol1.dot -o arbol1.png");
+	system("arbol1.png" );
+}
+/*Reporte Arbol Preorden*/
+void ReporteArbolPreorden(){
+	ofstream archivo;
+	char rpt;
+
+	archivo.open("arbol2.dot",ios::out); //Creamos el archivo
+	
+	if(archivo.fail()){ //Si a ocurrido algun error
+		cout<<"No se pudo abrir el archivo";
+		exit(1);
+	}
+	
+	archivo<<"digraph G {"<<endl;
+	archivo<<"rankdir=LR;"<<endl;
+	archivo<<"Preorden "<<Preorden<<";"<<endl;
+	archivo<<"}"<<endl;
+	archivo.close(); //Cerramos el archivo
+	
+	system("dot -Tpng arbol2.dot -o arbol2.png");
+	system("arbol2.png" );
+}
+/*Reporte Arbol Postorden*/
+void ReporteArbolPostorden(){
+	ofstream archivo;
+	char rpt;
+
+	archivo.open("arbol3.dot",ios::out); //Creamos el archivo
+	
+	if(archivo.fail()){ //Si a ocurrido algun error
+		cout<<"No se pudo abrir el archivo";
+		exit(1);
+	}
+	
+	archivo<<"digraph G {"<<endl;
+	archivo<<"rankdir=LR;"<<endl;
+	archivo<<"Postorden "<<Postorden<<";"<<endl;
+	archivo<<"}"<<endl;
+	archivo.close(); //Cerramos el archivo
+	
+	system("dot -Tpng arbol3.dot -o arbol3.png");
+	system("arbol3.png" );
+}
+
+void ReporteMatriz(){
+	DesplegarCubo(1);
+	ofstream archivo;
+	char rpt;
+
+	archivo.open("capa.dot",ios::out); //Creamos el archivo
+	
+	if(archivo.fail()){ //Si a ocurrido algun error
+		cout<<"No se pudo abrir el archivo";
+		exit(1);
+	}
+	
+	archivo<<"digraph G {"<<endl;
+	archivo<<"rankdir=LR"<<endl;
+	archivo<<"node [shape=rectangle];"<<endl;
+    archivo<<"graph [ranksep="<<"0.5"<<", nodesep="<<"0.5"<<"];"<<endl;
+	archivo<<ReporteMatrix<<endl;
+    archivo<<"}"<<endl;
+	archivo.close(); //Cerramos el archivo
+	
+	system("dot -Tpng capa.dot -o capa.png");
+	system("capa.png" );
+}
 /*Main*/
 int main ()
 {
@@ -651,8 +773,8 @@ int main ()
 				InsertarImagen(nombre,carpeta);
 				break;
 			case 2:
-				Arbol.inorder();
-				ArbolTemp.inorder();
+				Arbol.Iinorder();
+				ArbolTemp.Iinorder();
 				break;
 			case 3:
 				cout<< "Opcion3\n";
@@ -673,8 +795,15 @@ int main ()
 				break;
 			case 6:
 				cout<< "Opcion6\n";
-				Arbol.Padre();
+				/*Arbol.Padre();
 				ReporteArbol();
+				Arbol.inorder();
+				ReporteArbolInorden();
+				Arbol.preorder();
+				ReporteArbolPreorden();
+				Arbol.postorder();
+				ReporteArbolPostorden();*/
+				ReporteMatriz();
 				break;				
 			case 7:
 				system("pause");
