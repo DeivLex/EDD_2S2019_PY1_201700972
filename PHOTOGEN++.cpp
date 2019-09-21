@@ -11,11 +11,12 @@ using namespace std;
 
 
 vector<string>cubo_lineal;
-
+vector<string>cubo_linea;
 
 string ReporteMatrix="";
 string ReporteMatrix1="";
 string ReporteMatrix2="";
+int NumCapa = 0;
 
 string GraficarArbol="";
 string Inorden="";
@@ -37,11 +38,13 @@ void AbrirConfig(string config,string carpeta);
 void AbrirCapa(string capa,string ancho_imagen,string carpeta);
 void EscribirHtml(string html,string css,string ancho_imagen,string alto_imagen);
 void Escribirscss(string css,string ancho_imagen,string alto_imagen,string ancho_pixel,string alto_pixel);
+void EscribirscssGris(string css,string ancho_imagen,string alto_imagen,string ancho_pixel,string alto_pixel);
 void ReporteArbol();
 void ReporteArbolInorden();
 void ReporteArbolPreorden();
 void ReporteArbolPostorden();
 void ReporteMatriz();
+void MenuReporte();
 
 /* clase nodo */
 class node{
@@ -204,7 +207,7 @@ public:
 		temp= temp2;
 		temp2 = temp2->down;
 		x=0;
-		y-=1;
+		y-=2;
 		tot+=1;
 		stringstream sx,sy,stot;
 		sy<<y;
@@ -217,7 +220,7 @@ public:
 		while(temp->right!=NULL){
 			temp = temp->right;
 			tot+=1;
-			x+=1;
+			x+=2;
 			stringstream sx,sy,stot;
 			sy<<y;
 			stot<<tot;
@@ -271,6 +274,7 @@ struct nodo{
 
 void InsertarMatriz(matrix n);
 void DesplegarCubo(int x);
+void ClearCubo();
 /*Metodos del cubo*/
 void InsertarMatriz(matrix n){
 	nodo* nuevo = new nodo();
@@ -292,21 +296,23 @@ void DesplegarCubo(int x){
 	actual = primero;
 	int j = 0;
 	if(primero != NULL){
-		
-		while(actual!=NULL ){
+		while(j!=x ){
+			actual = actual->siguiente;
+			j++;
 			if(x==j){
 			actual->dato.print_nodes_full();
 			actual->dato.print_nodes_full_down();
 			}
-			//cout<< endl;
-			actual = actual->siguiente;
-			j++;
 		}
 	}else{
 		cout  << "\nEl cubo disperso se encuentra vacio\n\n";
 	}
 }
 
+void ClearCubo(){
+	primero = NULL;
+	ultimo = NULL;
+}
 /*RGB to Hexa*/
 class RGB
 {
@@ -465,8 +471,11 @@ void tree :: Padre( Node *root) {
 /*Creacion del arbol*/
 tree Arbol;
 tree ArbolTemp;
+
 /*Abrir primer csv*/
 void InsertarImagen(string nombre,string carpeta){
+	ClearCubo();
+	cubo_lineal.clear();
 	string config;
 	string capa;
 	string direccion = carpeta+"/"+nombre;
@@ -527,7 +536,7 @@ void AbrirConfig(string config,string carpeta){
 
 /*abrir capas */
 void AbrirCapa(string capa,string ancho_imagen,string carpeta){
-	/*Cubo*/	
+	/*Cubo*/
 	matrix *cubo = new matrix;
 	int ancho = atoi(ancho_imagen.c_str());
 	
@@ -539,12 +548,13 @@ void AbrirCapa(string capa,string ancho_imagen,string carpeta){
 		string word = "";
 	while (getline(strstr,word, ',')){
 		cubo_lineal.push_back(word);
+		cubo_linea.push_back(word);
 	}
 	}
 	int x=1;
 	int y=1;
-	for (unsigned i = 0; i < cubo_lineal.size(); i++){
-		cubo->add(cubo_lineal.at(i),x,y);
+	for (unsigned i = 0; i < cubo_linea.size(); i++){
+		cubo->add(cubo_linea.at(i),x,y);
 		x+=1;
 		if(x==ancho+1){
 			y+=1;
@@ -552,6 +562,7 @@ void AbrirCapa(string capa,string ancho_imagen,string carpeta){
 		}
 	}
 	InsertarMatriz(*cubo);
+	cubo_linea.clear();
 }
 /*Escribir css*/
 void Escribirscss(string css,string ancho_imagen,string alto_imagen,string ancho_pixel,string alto_pixel){
@@ -642,7 +653,6 @@ void Escribirscss(string css,string ancho_imagen,string alto_imagen,string ancho
 	}
 	
 	archivo.close(); //Cerramos el archivo
-	cubo_lineal.clear();
 	pintar.clear();
 	value.clear();
 }
@@ -682,6 +692,97 @@ void EscribirHtml(string html, string css,string ancho_imagen,string alto_imagen
 
 	archivo.close(); //Cerramos el archivo
 }
+/*Filtro grises*/
+void EscribirscssGris(string css,string ancho_imagen,string alto_imagen,string ancho_pixel,string alto_pixel){
+	
+	int altoactual = atoi(alto_imagen.c_str())*atoi(alto_pixel.c_str());
+	int anchoactual = atoi(ancho_imagen.c_str())*atoi(ancho_pixel.c_str());
+	
+	int AltoPorAncho = atoi(ancho_imagen.c_str())*atoi(alto_imagen.c_str());
+	
+	vector<int>pintar;
+	vector<string>value;
+	
+	
+	for(int i=0; i<pintar.size();i++){
+		cout<<pintar.at(i)<<"->";
+	}
+	
+	ofstream archivo;
+	string nombreArchivo,frase;
+	char rpt;
+	
+	string token = nombre.substr(0, nombre.find(".csv"));
+	string direccion = "Exports/"+token;
+	mkdir(direccion.c_str());
+	string nombrecss = direccion+"/"+css;
+	
+	archivo.open(nombrecss.c_str(),ios::out); //Creamos el archivo
+	
+	if(archivo.fail()){ //Si a ocurrido algun error
+		cout<<"No se pudo abrir el archivo";
+		exit(1);
+	}
+
+	archivo<<"body {"<<endl;
+    archivo<<"  background: #333333;"<<endl;      
+    archivo<<"  height: 100vh;"<<endl;
+    archivo<<"  display: flex;"<<endl;          
+    archivo<<"  justify-content: center;"<<endl;
+    archivo<<"  align-items: center;"<<endl;
+    archivo<<"}"<<endl;
+
+    archivo<<".canvas {"<<endl;
+    archivo<<"  width: "<<anchoactual<<"px;"<<endl;
+    archivo<<"  height: "<<altoactual<<"px;"<<endl;
+	archivo<<"}"<<endl;
+
+	archivo<<".pixel {"<<endl;
+    archivo<<"  width: "<<ancho_pixel<<"px;"<<endl;
+    archivo<<"  height: "<<alto_pixel<<"px;"<<endl;
+    archivo<<"  float: left;"<<endl;
+    archivo<<"}"<<endl;
+	int K=0;
+	for (int i=0; i<cubo_lineal.size(); i++){
+	
+		if(K==AltoPorAncho){
+			K=0;
+		}
+	if(cubo_lineal.at(i)!="x"){
+		pintar.push_back(K+1);
+		//metodo de split
+		string hola = cubo_lineal.at(i);
+		char str[hola.size()+1];
+		strcpy(str,hola.c_str());
+		char* point;
+		point = strtok(str,"-");
+	    
+	    int r = atoi(point);
+		point = strtok(NULL,"-");
+		int g = atoi(point);
+		point = strtok(NULL,"-");
+		int b = atoi(point);
+		point = strtok(NULL,"-");
+		//pasar valores
+		//RGB data = RGB(r, g, b);
+		int y=(0.2126*r)+(0.7152*g)+(0.0722*b);
+		RGB data = RGB(y, y, y);
+		value.push_back(RGBToHexadecimal(data));
+	}
+	K+=1;
+	}
+
+	for(int i=0; i<pintar.size();i++){
+		archivo<<".pixel:nth-child("<<pintar.at(i)<<")"<<endl;
+		archivo<<"  {background: "<<value.at(i)<<";"<<endl;
+	archivo<<"}"<<endl;
+	}
+	
+	archivo.close(); //Cerramos el archivo
+	pintar.clear();
+	value.clear();
+}
+
 /*Reporte Arbol binario*/
 void ReporteArbol(){
 	ofstream archivo;
@@ -770,7 +871,7 @@ void ReporteArbolPostorden(){
 }
 
 void ReporteMatriz(){
-	DesplegarCubo(1);
+	DesplegarCubo(NumCapa);
 	ofstream archivo;
 	char rpt;
 
@@ -784,9 +885,6 @@ void ReporteMatriz(){
 	archivo<<"node[shape=record];"<<endl;
     archivo<<"graph[pencolor=transparent];"<<endl;
     archivo<<"node [style=filled];";
-	cout<<ReporteMatrix1<<endl;
-	cout<<"-------------------"<<endl;
-	cout<<ReporteMatrix2<<endl;
 	archivo<<ReporteMatrix<<endl;
 	archivo<<ReporteMatrix1<<endl;
 	archivo<<ReporteMatrix2<<endl;
@@ -796,13 +894,71 @@ void ReporteMatriz(){
 	system("neato -Tpng capa.dot -o capa.png");
 	system("capa.png" );
 }
+
+/*Menu reportes*/
+void MenuReporte(){
+	int a;
+	do{
+		cout<< "\n";
+		cout<< "1. Arbol\n";
+		cout<< "2. Arbol Inorden\n";
+		cout<< "3. Arbol Preorden\n";
+		cout<< "4. Arbol Postorden\n";
+		cout<< "5. Cubo\n";
+		cout<< "6. Filtros Aplicados\n";
+		cout<< "7. Exit \n\n";
+		cout<<"Option to select: "; 
+		cin >> a ;
+		cout<< "\n";
+		
+		switch (a)
+		{
+			case 1:
+				cout<< "Arbol\n";
+				Arbol.Padre();
+				ReporteArbol();
+				break;
+			case 2:
+				cout<< "Arbol Inorden\n";
+				Arbol.inorder();
+				ReporteArbolInorden();
+				break;
+			case 3:
+				cout<< "Arbol Preorden\n";
+				Arbol.preorder();
+				ReporteArbolPreorden();
+				break;
+			case 4:
+				cout<< "Arbol Postorden\n";
+				Arbol.postorder();
+				ReporteArbolPostorden();
+				break;
+			case 5:
+				cout<<"Numero de capa: "; 
+				cin >> NumCapa;
+				cout<< "Cubo\n";
+				ReporteMatrix="";
+				ReporteMatrix1="";
+				ReporteMatrix2="";
+				ReporteMatriz();
+				break;
+			case 6:
+				cout<< "Opcion6\n";
+				break;				
+			case 7:
+				system("pause");
+				return;
+				break;
+			default:
+				break;
+		}
+	}
+	while(a != 3);
+}
+
 /*Main*/
 int main ()
 {
-	string parametrox;
-	string parametroy;
-	string parametroz;
-	string parametrocolor;
 	int a;
 	do{
 		cout<< "\n";
@@ -831,33 +987,17 @@ int main ()
 				ArbolTemp.Iinorder();
 				break;
 			case 3:
-				cout<< "Opcion3\n";
+				cout<< "Menu filtros\n";
+				EscribirscssGris(css,ancho_imagen,alto_imagen,ancho_pixel,alto_pixel);
 				break;
 			case 4:
-				cout<<"Coordenada x: "; 
-				cin>>parametrox;
-				cout<<"Coordenada y: "; 
-				cin>>parametroy;
-				cout<<"Numero de capa: "; 
-				cin>>parametroz;
-				cout<<"Color R-G-B: "; 
-				cin>>parametrocolor;
-				cout<<parametrox+","+parametroy+","+parametroz+","+parametrocolor;
+				cout<<"Funcion en proceso, Espere hasta la proxima version\n"; 
 				break;
 			case 5:
-				cout<< "Opcion5\n";
+				cout<< "Imagen Exportada\n";
 				break;
 			case 6:
-				cout<< "Opcion6\n";
-				/*Arbol.Padre();
-				ReporteArbol();
-				Arbol.inorder();
-				ReporteArbolInorden();
-				Arbol.preorder();
-				ReporteArbolPreorden();
-				Arbol.postorder();
-				ReporteArbolPostorden();*/
-				ReporteMatriz();
+				MenuReporte();
 				break;				
 			case 7:
 				system("pause");
