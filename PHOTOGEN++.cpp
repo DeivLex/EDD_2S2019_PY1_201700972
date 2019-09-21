@@ -12,6 +12,8 @@ using namespace std;
 
 vector<string>cubo_lineal;
 vector<string>cubo_linea;
+vector<string>Filtros;
+vector<string>ArbolNombre;
 
 string ReporteMatrix="";
 string ReporteMatrix1="";
@@ -33,18 +35,21 @@ string alto_imagen;
 string ancho_pixel;
 string alto_pixel;
 
+void SeleccionarImagen(string nombre,string carpeta);
 void InsertarImagen(string nombre,string carpeta);
 void AbrirConfig(string config,string carpeta);
 void AbrirCapa(string capa,string ancho_imagen,string carpeta);
 void EscribirHtml(string html,string css,string ancho_imagen,string alto_imagen);
 void Escribirscss(string css,string ancho_imagen,string alto_imagen,string ancho_pixel,string alto_pixel);
 void EscribirscssGris(string css,string ancho_imagen,string alto_imagen,string ancho_pixel,string alto_pixel);
+void EscribirscssNegativo(string css,string ancho_imagen,string alto_imagen,string ancho_pixel,string alto_pixel);
 void ReporteArbol();
 void ReporteArbolInorden();
 void ReporteArbolPreorden();
 void ReporteArbolPostorden();
 void ReporteMatriz();
 void MenuReporte();
+void MenuFiltros();
 
 /* clase nodo */
 class node{
@@ -386,11 +391,13 @@ public:
     void preorder()  { preorder(root);};
     void Padre()  { Padre(root);};
     void Iinorder()  { Iinorder(root);};
+    void Select()  { Select(root);};
     void inorder( Node* actual) ;
     void postorder( Node*actual);
     void preorder( Node* actual) ;
     void Padre( Node* actual) ;
     void Iinorder( Node* actual) ;
+    void Select( Node* actual) ;
     
 };
 
@@ -425,6 +432,15 @@ void tree :: Iinorder( Node *root) {
         Iinorder(root -> n_izq);
         cout <<" - "<< root->data <<endl;
         Iinorder(root -> n_der);
+    }
+    
+}
+
+void tree :: Select( Node *root) {
+    if (root != NULL) {
+        Select(root -> n_izq);
+        ArbolNombre.push_back(root->data);
+		Select(root -> n_der);
     }
     
 }
@@ -470,12 +486,46 @@ void tree :: Padre( Node *root) {
 }
 /*Creacion del arbol*/
 tree Arbol;
-tree ArbolTemp;
+tree ArbolC;
+/*Seleccionar*/
+void SeleccionarImagen(string nombre,string carpeta){
+	ClearCubo();
+	cubo_lineal.clear();
+	Filtros.clear();
+	string config;
+	string capa;
+	string direccion = carpeta+"/"+nombre;
+	ifstream infile(direccion.c_str());
+	string line = "";
+	vector<string>datos_csv;
+	while (getline(infile, line)){
+		stringstream strstr(line);
+		string word = "";
+	while (getline(strstr,word, ',')){
+		datos_csv.push_back(word);
+	}
+	}
+	for (unsigned i = 1; i < datos_csv.size(); i+=2){
+		if (i==3){
+			config = datos_csv.at(i);
+			AbrirConfig(config,carpeta);
+		}else{
+			capa = datos_csv.at(i);
+			AbrirCapa(capa, ancho_imagen,carpeta);
+		}
+	}
+	string token = nombre.substr(0, nombre.find(".csv"));
+	html=token+".html";
+	css =token+".scss";
+	Escribirscss(css,ancho_imagen,alto_imagen,ancho_pixel,alto_pixel);
+	EscribirHtml(html,css,ancho_imagen,alto_imagen);
+}
 
 /*Abrir primer csv*/
 void InsertarImagen(string nombre,string carpeta){
 	ClearCubo();
 	cubo_lineal.clear();
+	Filtros.clear();
 	string config;
 	string capa;
 	string direccion = carpeta+"/"+nombre;
@@ -500,7 +550,7 @@ void InsertarImagen(string nombre,string carpeta){
 	}
 	string token = nombre.substr(0, nombre.find(".csv"));
 	Arbol.insert(token+"_Imagen_"+ancho_imagen+"X"+alto_imagen+"_Pixel_"+ancho_pixel+"X"+alto_pixel);
-	ArbolTemp.insert(direccion);
+	ArbolC.insert(carpeta);
 	html=token+".html";
 	css =token+".scss";
 	Escribirscss(css,ancho_imagen,alto_imagen,ancho_pixel,alto_pixel);
@@ -783,6 +833,98 @@ void EscribirscssGris(string css,string ancho_imagen,string alto_imagen,string a
 	value.clear();
 }
 
+/*Filtro negativo*/
+void EscribirscssNegativo(string css,string ancho_imagen,string alto_imagen,string ancho_pixel,string alto_pixel){
+	
+	int altoactual = atoi(alto_imagen.c_str())*atoi(alto_pixel.c_str());
+	int anchoactual = atoi(ancho_imagen.c_str())*atoi(ancho_pixel.c_str());
+	
+	int AltoPorAncho = atoi(ancho_imagen.c_str())*atoi(alto_imagen.c_str());
+	
+	vector<int>pintar;
+	vector<string>value;
+	
+	
+	for(int i=0; i<pintar.size();i++){
+		cout<<pintar.at(i)<<"->";
+	}
+	
+	ofstream archivo;
+	string nombreArchivo,frase;
+	char rpt;
+	
+	string token = nombre.substr(0, nombre.find(".csv"));
+	string direccion = "Exports/"+token;
+	mkdir(direccion.c_str());
+	string nombrecss = direccion+"/"+css;
+	
+	archivo.open(nombrecss.c_str(),ios::out); //Creamos el archivo
+	
+	if(archivo.fail()){ //Si a ocurrido algun error
+		cout<<"No se pudo abrir el archivo";
+		exit(1);
+	}
+
+	archivo<<"body {"<<endl;
+    archivo<<"  background: #333333;"<<endl;      
+    archivo<<"  height: 100vh;"<<endl;
+    archivo<<"  display: flex;"<<endl;          
+    archivo<<"  justify-content: center;"<<endl;
+    archivo<<"  align-items: center;"<<endl;
+    archivo<<"}"<<endl;
+
+    archivo<<".canvas {"<<endl;
+    archivo<<"  width: "<<anchoactual<<"px;"<<endl;
+    archivo<<"  height: "<<altoactual<<"px;"<<endl;
+	archivo<<"}"<<endl;
+
+	archivo<<".pixel {"<<endl;
+    archivo<<"  width: "<<ancho_pixel<<"px;"<<endl;
+    archivo<<"  height: "<<alto_pixel<<"px;"<<endl;
+    archivo<<"  float: left;"<<endl;
+    archivo<<"}"<<endl;
+	int K=0;
+	for (int i=0; i<cubo_lineal.size(); i++){
+	
+		if(K==AltoPorAncho){
+			K=0;
+		}
+	if(cubo_lineal.at(i)!="x"){
+		pintar.push_back(K+1);
+		//metodo de split
+		string hola = cubo_lineal.at(i);
+		char str[hola.size()+1];
+		strcpy(str,hola.c_str());
+		char* point;
+		point = strtok(str,"-");
+	    
+	    int r = atoi(point);
+		point = strtok(NULL,"-");
+		int g = atoi(point);
+		point = strtok(NULL,"-");
+		int b = atoi(point);
+		point = strtok(NULL,"-");
+		//pasar valores
+		int q =(255-r);
+		int w =(255-g);
+		int e =(255-b);
+		RGB data = RGB(q, w, e);
+		value.push_back(RGBToHexadecimal(data));
+	}
+	K+=1;
+	}
+
+	for(int i=0; i<pintar.size();i++){
+		archivo<<".pixel:nth-child("<<pintar.at(i)<<")"<<endl;
+		archivo<<"  {background: "<<value.at(i)<<";"<<endl;
+	archivo<<"}"<<endl;
+	}
+	
+	archivo.close(); //Cerramos el archivo
+	pintar.clear();
+	value.clear();
+}
+
 /*Reporte Arbol binario*/
 void ReporteArbol(){
 	ofstream archivo;
@@ -869,7 +1011,7 @@ void ReporteArbolPostorden(){
 	system("dot -Tpng arbol3.dot -o arbol3.png");
 	system("arbol3.png" );
 }
-
+//Reporte matriz
 void ReporteMatriz(){
 	DesplegarCubo(NumCapa);
 	ofstream archivo;
@@ -894,7 +1036,33 @@ void ReporteMatriz(){
 	system("neato -Tpng capa.dot -o capa.png");
 	system("capa.png" );
 }
+//reporte filtros
+void ReporteFiltros(){
+	ofstream archivo;
+	char rpt;
 
+	archivo.open("filtros.dot",ios::out); //Creamos el archivo
+	
+	if(archivo.fail()){ //Si a ocurrido algun error
+		cout<<"No se pudo abrir el archivo";
+		exit(1);
+	}
+	
+	archivo<<"digraph G {"<<endl;
+	archivo<<"rankdir=LR"<<endl;
+	archivo<<"node [shape=box]"<<endl;
+	archivo<<"Filtros_Aplicados";
+	for(int i=0;i<Filtros.size(); i++){
+	archivo<<" -> "<<Filtros.at(i);	
+	}
+	archivo<<"-> Filtros_Aplicados";
+	archivo<<"[dir=both];";
+	archivo<<"}"<<endl;
+	archivo.close(); //Cerramos el archivo
+	
+	system("dot -Tpng filtros.dot -o filtros.png");
+	system("filtros.png" );
+}
 /*Menu reportes*/
 void MenuReporte(){
 	int a;
@@ -943,7 +1111,8 @@ void MenuReporte(){
 				ReporteMatriz();
 				break;
 			case 6:
-				cout<< "Opcion6\n";
+				cout<< "Filtros aplicados\n";
+				ReporteFiltros();
 				break;				
 			case 7:
 				system("pause");
@@ -956,9 +1125,44 @@ void MenuReporte(){
 	while(a != 3);
 }
 
+void MenuFiltros(){
+	int a;
+	do{
+		cout<< "\n";
+		cout<< "1. Grises\n";
+		cout<< "2. Negativo\n";
+		cout<< "3. Exit \n\n";
+		cout<<"Option to select: "; 
+		cin >> a ;
+		cout<< "\n";
+		
+		switch (a)
+		{
+			case 1:
+				cout<< "Filtro gris aplicado\n";
+				EscribirscssGris(css,ancho_imagen,alto_imagen,ancho_pixel,alto_pixel);
+				Filtros.push_back("Grises");
+				break;
+			case 2:
+				cout<< "Filtro negativo aplicado\n";
+				EscribirscssNegativo(css,ancho_imagen,alto_imagen,ancho_pixel,alto_pixel);
+				Filtros.push_back("Negativo");
+				break;			
+			case 3:
+				system("pause");
+				return;
+				break;
+			default:
+				break;
+		}
+	}
+	while(a != 3);
+}
 /*Main*/
 int main ()
 {
+	string hola,hola1="";
+	int NumImagen =0;
 	int a;
 	do{
 		cout<< "\n";
@@ -984,11 +1188,16 @@ int main ()
 				break;
 			case 2:
 				Arbol.Iinorder();
-				ArbolTemp.Iinorder();
+				cout<<"Numero de imagen: "; 
+				cin>>NumImagen;
+				ArbolC.Select();
+				hola=ArbolNombre.at(NumImagen-1);
+				hola1=hola+".csv";
+				SeleccionarImagen(hola1,hola);
 				break;
 			case 3:
 				cout<< "Menu filtros\n";
-				EscribirscssGris(css,ancho_imagen,alto_imagen,ancho_pixel,alto_pixel);
+				MenuFiltros();
 				break;
 			case 4:
 				cout<<"Funcion en proceso, Espere hasta la proxima version\n"; 
