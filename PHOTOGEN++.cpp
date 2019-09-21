@@ -14,6 +14,9 @@ vector<string>cubo_lineal;
 
 
 string ReporteMatrix="";
+string ReporteMatrix1="";
+string ReporteMatrix2="";
+
 string GraficarArbol="";
 string Inorden="";
 string Preorden="";
@@ -192,23 +195,70 @@ public:
 	}
 	
 	void print_nodes_full(){
+		int tot=0;
+		int x = 0;
+		int y = 7;
 		node *temp = head;
 		node *temp2 = head;
 	while(temp->down!=NULL){
 		temp= temp2;
 		temp2 = temp2->down;
-		ReporteMatrix = ReporteMatrix + "C"+temp->data;
-		cout<<temp->data;
+		x=0;
+		y-=1;
+		tot+=1;
+		stringstream sx,sy,stot;
+		sy<<y;
+		stot<<tot;
+		sx<<x;
+		if(temp->data != "x"){
+		ReporteMatrix = ReporteMatrix +" p"+stot.str()+"[label="+(char)34+"{<data>"+temp->data+"|<next>}"+(char)34+"pos="+char(34)+sx.str()+","+sy.str()+"!"+(char)34+"];";
+		ReporteMatrix1 = ReporteMatrix1 + "p"+stot.str();
+	}
 		while(temp->right!=NULL){
 			temp = temp->right;
-			if(temp->data!="x"){
-			ReporteMatrix = ReporteMatrix +" -> "+temp->data;
+			tot+=1;
+			x+=1;
+			stringstream sx,sy,stot;
+			sy<<y;
+			stot<<tot;
+			sx<<x;
+			if(temp->data != "x"){
+			ReporteMatrix = ReporteMatrix +" p"+stot.str()+"[label="+(char)34+"{<data>"+temp->data+"|<next>}"+(char)34+"pos="+char(34)+sx.str()+","+sy.str()+"!"+(char)34+"];";
+			ReporteMatrix1 = ReporteMatrix1 +" -> "+ "p"+stot.str();
 			}
-			cout<<"->";
-			cout<<temp->data;
 		}
-		ReporteMatrix = ReporteMatrix+"[dir=both];" + "\n";
-		//cout<<"\n";
+		ReporteMatrix = ReporteMatrix + "\n";
+		ReporteMatrix1 = ReporteMatrix1+"[dir=both];" + "\n";
+	}
+	}
+	
+	void print_nodes_full_down(){
+		int log = 1+ atoi(ancho_imagen.c_str());
+		int tot=0;
+		int x = 0;
+		int y = 0;
+		node *temp = head;
+		node *temp2 = head;
+	while(temp->right!=NULL){
+		temp= temp2;
+		temp2 = temp2->right;
+		y+=1;
+		tot=y;
+		stringstream stot;
+		stot<<tot;
+		if(temp->data != "x"){
+		ReporteMatrix2 = ReporteMatrix2 + "p"+stot.str();
+	}
+		while(temp->down!=NULL){
+			temp = temp->down;
+			tot+=log;
+			stringstream stot;
+			stot<<tot;
+			if(temp->data != "x"){
+			ReporteMatrix2 = ReporteMatrix2 +" -> "+ "p"+stot.str();
+	}
+		}
+		ReporteMatrix2 = ReporteMatrix2+"[dir=both];" + "\n";
 	}
 	}
 };
@@ -243,13 +293,15 @@ void DesplegarCubo(int x){
 	int j = 0;
 	if(primero != NULL){
 		
-		while(x != j ){
-			actual->dato.print_nodes_full();  
-			cout<< endl;
+		while(actual!=NULL ){
+			if(x==j){
+			actual->dato.print_nodes_full();
+			actual->dato.print_nodes_full_down();
+			}
+			//cout<< endl;
 			actual = actual->siguiente;
 			j++;
 		}
-		
 	}else{
 		cout  << "\nEl cubo disperso se encuentra vacio\n\n";
 	}
@@ -473,12 +525,10 @@ void AbrirConfig(string config,string carpeta){
 	}
 }
 
-/*Cubo*/
-	matrix *cubo = new matrix;
-
 /*abrir capas */
 void AbrirCapa(string capa,string ancho_imagen,string carpeta){
-	
+	/*Cubo*/	
+	matrix *cubo = new matrix;
 	int ancho = atoi(ancho_imagen.c_str());
 	
 	string direccion = carpeta+"/"+capa;
@@ -730,16 +780,20 @@ void ReporteMatriz(){
 		cout<<"No se pudo abrir el archivo";
 		exit(1);
 	}
-	
 	archivo<<"digraph G {"<<endl;
-	archivo<<"rankdir=LR"<<endl;
-	archivo<<"node [shape=rectangle];"<<endl;
-    archivo<<"graph [ranksep="<<"0.5"<<", nodesep="<<"0.5"<<"];"<<endl;
+	archivo<<"node[shape=record];"<<endl;
+    archivo<<"graph[pencolor=transparent];"<<endl;
+    archivo<<"node [style=filled];";
+	cout<<ReporteMatrix1<<endl;
+	cout<<"-------------------"<<endl;
+	cout<<ReporteMatrix2<<endl;
 	archivo<<ReporteMatrix<<endl;
+	archivo<<ReporteMatrix1<<endl;
+	archivo<<ReporteMatrix2<<endl;
     archivo<<"}"<<endl;
 	archivo.close(); //Cerramos el archivo
 	
-	system("dot -Tpng capa.dot -o capa.png");
+	system("neato -Tpng capa.dot -o capa.png");
 	system("capa.png" );
 }
 /*Main*/
